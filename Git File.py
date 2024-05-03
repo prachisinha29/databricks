@@ -38,3 +38,7 @@ def tracking_gold():
     return (
         dlt.read("tracking_silver").groupBy("country").agg(F.count("*").alias("row_count"))
     )
+
+# COMMAND ----------
+
+print("This is test.")
