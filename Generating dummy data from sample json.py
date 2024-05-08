@@ -72,4 +72,14 @@ df_add_id = dfTestData.withColumn("combinedPK", concat_ws("-", "chassisNumber", 
                      .withColumn("first_label", col("labels").getItem(0)) \
                      .select("version","triggerType", "dataContentName", "platformVehicleIdentifier", "platformFleetOrganizationIdentifiers") \
                      .orderBy(col("version").desc())
-display(df_add_id)
+#display(df_add_id)
+
+# COMMAND ----------
+
+import dlt
+@dlt.create_table(name="generated_tracking_data", comment="testing pipeline")
+@dlt.expect_or_drop("valid_vin", "vin IS NOT NULL") 
+def generated_tracking_data():
+    return (
+        dlt.read("df_add_id").select( "*" )
+    )
