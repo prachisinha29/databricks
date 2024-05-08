@@ -62,3 +62,14 @@ generation_spec = (
 
 dfTestData = generation_spec.build()
 display(dfTestData,10)
+
+# COMMAND ----------
+
+from pyspark.sql.functions import *
+
+df_add_id = dfTestData.withColumn("combinedPK", concat_ws("-", "chassisNumber", "chassisSeries", "vin")) \
+                     .withColumn("WK_PK", monotonically_increasing_id()) \
+                     .withColumn("first_label", col("labels").getItem(0)) \
+                     .select("version","triggerType", "dataContentName", "platformVehicleIdentifier", "platformFleetOrganizationIdentifiers") \
+                     .orderBy(col("version").desc())
+display(df_add_id)
