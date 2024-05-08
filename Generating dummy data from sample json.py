@@ -65,16 +65,20 @@ df_add_id = dfTestData.withColumn("combinedPK", concat_ws("-", "chassisNumber", 
                      .withColumn("first_label", col("labels").getItem(0)) \
                      .select("version","triggerType", "dataContentName", "platformVehicleIdentifier", "platformFleetOrganizationIdentifiers") \
                      .orderBy(col("version").desc())
+
 display(df_add_id)
 df_add_id.write.mode("overwrite").format("delta").saveAsTable(f"{path_tables}" + "." + f"{table_name}")
+
 
 # COMMAND ----------
 
 import dlt
+
 
 @dlt.create_table(name="generated_trackingdata", comment="testing pipeline")
 @dlt.expect_or_drop("valid_id", "platformVehicleIdentifier IS NOT NULL") 
 def generated_trackingdata():
     return (
         spark.table("hive_metastore.bronze_raw.generated_tracking_data").select( "*" )
+
     )
