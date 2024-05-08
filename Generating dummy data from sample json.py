@@ -15,13 +15,6 @@ code =  dg.DataAnalyzer.scriptDataGeneratorFromSchema(dfSource.schema)
 # COMMAND ----------
 
 
-# Code snippet generated with Databricks Labs Data Generator (`dbldatagen`) DataAnalyzer class
-# Install with `pip install dbldatagen` or in notebook with `%pip install dbldatagen`
-# See the following resources for more details:
-#
-#   Getting Started - [https://databrickslabs.github.io/dbldatagen/public_docs/APIDOCS.html]
-#   Github project - [https://github.com/databrickslabs/dbldatagen]
-#
 import dbldatagen as dg
 import pyspark.sql.types
 
@@ -61,20 +54,27 @@ display(dfTestData,10)
 # COMMAND ----------
 
 from pyspark.sql.functions import *
+catalog = "hive_metastore"
+schema = "bronze_raw"
+table_name = "generated_tracking_data"
+path_tables = catalog + "." + schema
+print(path_tables) # Show the complete path
 
 df_add_id = dfTestData.withColumn("combinedPK", concat_ws("-", "chassisNumber", "chassisSeries", "vin")) \
                      .withColumn("WK_PK", monotonically_increasing_id()) \
                      .withColumn("first_label", col("labels").getItem(0)) \
                      .select("version","triggerType", "dataContentName", "platformVehicleIdentifier", "platformFleetOrganizationIdentifiers") \
                      .orderBy(col("version").desc())
-#display(df_add_id)
+display(df_add_id)
+df_add_id.write.mode("overwrite").format("delta").saveAsTable(f"{path_tables}" + "." + f"{table_name}")
 
 # COMMAND ----------
 
 import dlt
-@dlt.create_table(name="generated_tracking_data", comment="testing pipeline")
-@dlt.expect_or_drop("valid_vin", "vin IS NOT NULL") 
-def generated_tracking_data():
+
+@dlt.create_table(name="generated_trackingdata", comment="testing pipeline")
+@dlt.expect_or_drop("valid_id", "platformVehicleIdentifier IS NOT NULL") 
+def generated_trackingdata():
     return (
-        dlt.read("df_add_id").select( "*" )
+        spark.table("hive_metastore.bronze_raw.generated_tracking_data").select( "*" )
     )
