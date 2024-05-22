@@ -3,15 +3,11 @@
 
 # COMMAND ----------
 
-# MAGIC %fs
-# MAGIC ls
-
-# COMMAND ----------
-
 import dbldatagen as dg
 
 dbfs_path = "/landing"
-jsons_path_data = f"{dbfs_path}/data/trackingevent.json"
+# jsons_path_data = f"{dbfs_path}/data/trackingevent.json"
+jsons_path_data = f"/Workspace/Users/sina.torabi@volvo.com/landing/TrackingEvent.json"
 dfSource = spark.read.format("json").option("multiline", "true").load(jsons_path_data)
 #display(dfSource)
 
@@ -62,3 +58,7 @@ generation_spec = (
 
 dfTestData = generation_spec.build()
 display(dfTestData,10)
+
+# COMMAND ----------
+
+
